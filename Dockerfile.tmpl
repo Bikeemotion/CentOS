@@ -1,0 +1,42 @@
+FROM centos${FROM_DOCKERFILE_TAG}
+MAINTAINER bikeemotion <backend@bikeemotion.com>
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=736694 
+# http://serverfault.com/questions/694942/yum-should-error-when-a-package-is-not-available
+RUN rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
+    PKGS_TO_INSTALL="\
+      bind-utils-9.9.4-38.el7_3 \
+      centos-release-scl-rh-2-2.el7.centos \
+      epel-release-7-6 \
+      gettext-0.18.2.1-4.el7 \
+      iproute-3.10.0-74.el7 \
+      sudo-1.8.6p7-21.el7_3 \
+      which-2.20-7.el7" && \
+    echo "Validating the existence of the following packages:" && \
+    for PKG in ${PKGS_TO_INSTALL}; do \
+      (echo "${PKG}" && yum info ${PKG} >> /dev/null 2>&1) || exit 1; \
+    done && \
+    yum -y --setopt=tsflags=nodocs install ${PKGS_TO_INSTALL} && \
+    rm -fr /var/cache/yum/* && \
+    yum clean all
+
+ADD root_fs/ /
+
+# despite 'en_US.UTF-8' being the default one in centos upstream image, its does not work for other users that root
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8 \
+    TERM=xterm
+
+# Get prefix path and path to scripts rather than hard-code them in scripts
+ENV CONTAINER_SCRIPTS_PATH=/usr/share/container_scripts
+
+# When bash is started non-interactively, to run a shell script, for example it
+# looks for this variable and source the content of this file. This will enable
+# the SCL for all scripts without need to do 'scl enable'.
+ENV BASH_ENV=${CONTAINER_SCRIPTS_PATH}/scl_enable \
+    ENV=${CONTAINER_SCRIPTS_PATH}/scl_enable \
+    PROMPT_COMMAND=". ${CONTAINER_SCRIPTS_PATH}/scl_enable"
+
+ENTRYPOINT ["container_entrypoint"]
+#CMD ["infinite_loop"]
+CMD ["bash"]

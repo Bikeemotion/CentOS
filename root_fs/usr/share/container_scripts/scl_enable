@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# This will make scl collection binaries work out of box.
+if [[ -n ${ENABLED_COLLECTIONS} ]]; then
+  unset BASH_ENV PROMPT_COMMAND ENV
+  source scl_source enable ${ENABLED_COLLECTIONS}
+fi
