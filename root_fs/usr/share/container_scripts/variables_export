@@ -1,0 +1,12 @@
+#!/bin/bash
+
+# https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
+set -e
+
+function variables_to_replace() {
+  VARIABLES_TO_REPLACE=${1}
+  local ARRAY=( $(echo ${VARIABLES_TO_REPLACE} | tr '${}:' ' ') )
+  for VARIABLE in "${ARRAY[@]}"; do
+    export ${VARIABLE}
+  done
+}

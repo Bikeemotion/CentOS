@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# https://www.gnu.org/software/bash/manual/html_node/The-Set-Builtin.html
+set -e
+
+# https://github.com/sclorg/postgresql-container/blob/e111ece2074e80b8da33b8d58e48e6d4c383d2db/9.5/root/usr/bin/cgroup-limits
+# : is shell builtin command. please check bash(1) man page for more info
+: '
+Variables currently supported:
+
+  MAX_MEMORY_LIMIT_IN_BYTES
+    Maximum possible limit MEMORY_LIMIT_IN_BYTES can have.
+
+  MEMORY_LIMIT_IN_BYTES
+    Maximum amount of user memory in bytes. If this value is set
+    to the same value as MAX_MEMORY_LIMIT_IN_BYTES, it means that
+    there is no limit set. The value is taken from
+    /sys/fs/cgroup/memory$(cat /proc/self/cgroup | grep memory | cut -d: -f3)/memory.limit_in_bytes (container)
+
+  MEMORY_LIMIT_IN_MEGABYTES
+    Converting MEMORY_LIMIT_IN_BYTES
+
+  NUMBER_OF_CORES
+    Number of detected CPU cores that can be used. This value is
+    calculated from /sys/fs/cgroup/cpuset/$(cat /proc/self/cgroup | grep memory | cut -d: -f3)/cpuset.cpus
+
+  NO_MEMORY_LIMIT
+    Set to "true" if MEMORY_LIMIT_IN_BYTES is so high that the caller
+    can act as if no memory limit was set. Undefined otherwise.
+'
+function read_file() {
+  local FILE="${1}"
+  local FILE_CONTENT=""
+  FILE_CONTENT=$(cat "${FILE}" 2>/dev/null)
+  #ls -l ${FILE} > /dev/null 2>&1
+  #if [[ "$?" -ne 0 ]]; then
+  #  FILE_CONTENT=none
+  #fi
+  echo "${FILE_CONTENT}"
+}
+
+MAX_MEMORY_LIMIT_IN_BYTES=""
+MAX_MEMORY_LIMIT_IN_BYTES=$(read_file /sys/fs/cgroup/memory/memory.limit_in_bytes)
+if [[ -z "${MAX_MEMORY_LIMIT_IN_BYTES}" ]]; then
+  MAX_MEMORY_LIMIT_IN_BYTES="9223372036854771712"
+fi
+
+MEMORY_LIMIT_IN_BYTES=""
+MEMORY_LIMIT_IN_BYTES=$(read_file /sys/fs/cgroup/memory"$(fgrep memory /proc/self/cgroup | cut -d: -f3)"/memory.limit_in_bytes)
+
+MEMORY_LIMIT_IN_MEGABYTES=$(awk -v MEM="${MEMORY_LIMIT_IN_BYTES}" 'BEGIN { print MEM/1048576 }')
+
+NUMBER_OF_CORES=""
+NUMBER_OF_CORES=$(read_file /sys/fs/cgroup/cpuset/"$(fgrep memory /proc/self/cgroup | cut -d: -f3)"/cpuset.cpus)
+ARRAY=( ${NUMBER_OF_CORES//-/ } )
+if [[ "${#ARRAY[@]}" -eq 2 ]]; then
+  NUMBER_OF_CORES=$(awk -v POS1="${ARRAY[0]}" -v POS2="${ARRAY[1]}" 'BEGIN { print POS2-POS1+1 }')
+else
+  NUMBER_OF_CORES=$((NUMBER_OF_CORES+1))
+fi
+
+NO_MEMORY_LIMIT=""
+if [[ -n "${MEMORY_LIMIT_IN_BYTES}" && "${MEMORY_LIMIT_IN_BYTES}" -ge "${MAX_MEMORY_LIMIT_IN_BYTES}" ]]; then
+  NO_MEMORY_LIMIT="true"
+fi
