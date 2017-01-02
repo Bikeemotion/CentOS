@@ -1,7 +1,7 @@
 #!/bin/bash
 
-docker inspect centos  > /dev/null 2>&1
+docker inspect be-centos  > /dev/null 2>&1
 if [[ "$?" -eq 0 ]]; then
-  docker kill centos > /dev/null 2>&1
-  docker rm centos > /dev/null 2>&1
+  docker kill be-centos > /dev/null 2>&1
+  docker rm be-centos > /dev/null 2>&1
 fi

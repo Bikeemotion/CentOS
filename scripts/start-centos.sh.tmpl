@@ -1,16 +1,16 @@
 #!/bin/bash
 
-docker stats --no-stream centos  > /dev/null 2>&1
+docker stats --no-stream be-centos  > /dev/null 2>&1
 if [[ "$?" -eq 0 ]]; then
   docker start \
     --attach \
     --interactive \
-    centos 
+    be-centos 
 else
   docker run \
     --interactive \
     --hostname docker-centos \
-    --name centos \
+    --name be-centos \
     --tty \
-    bikeemotion/centos:latest-localdockers
+    ${REGISTRY}centos${IMAGE_TAG}
 fi
