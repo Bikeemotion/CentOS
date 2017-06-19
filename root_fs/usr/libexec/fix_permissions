@@ -2,7 +2,7 @@
 
 # Fix permissions on the given directory to allow group read/write of 
 # regular files and execute of directories.
-chown -R "$1" "$2"
-chgrp -R 0 "$2"
+chown -R "$1":"$1" "$2"
+#chgrp -R 0 "$2"
 #chmod -R g+rw "$2"
 #find "$2" -type d -exec chmod g+x {} +
