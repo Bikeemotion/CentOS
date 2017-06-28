@@ -5,14 +5,14 @@ MAINTAINER bikeemotion <backend@bikeemotion.com>
 # http://serverfault.com/questions/694942/yum-should-error-when-a-package-is-not-available
 RUN rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
     PKGS_TO_INSTALL="\
-      bind-utils-9.9.4-38.el7_3.2 \
-      centos-release-scl-rh-2-2.el7.centos \
-      epel-release-7-9 \
-      gettext-0.18.2.1-4.el7 \
-      iproute-3.10.0-74.el7 \
-      libcgroup-tools-0.41-11.el7 \
-      sudo-1.8.6p7-21.el7_3 \
-      which-2.20-7.el7" && \
+      bind-utils-9.9.4-* \
+      centos-release-scl-rh-2-* \
+      epel-release-7-* \
+      gettext-0.18.2.1-* \
+      iproute-3.10.0-* \
+      libcgroup-tools-0.41-* \
+      sudo-1.8.6p7-* \
+      which-2.20-*" && \
     echo "Validating the existence of the following packages:" && \
     for PKG in ${PKGS_TO_INSTALL}; do \
       (echo "${PKG}" && yum info ${PKG} >> /dev/null 2>&1) || exit 1; \
