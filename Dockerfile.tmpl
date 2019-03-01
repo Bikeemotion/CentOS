@@ -9,9 +9,9 @@ RUN rpmkeys --import file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-7 && \
       centos-release-scl-rh-2-* \
       epel-release-7-* \
       gettext-0.19.8.1-* \
-      iproute-3.10.0-* \
+      iproute-4.11.0-* \
       libcgroup-tools-0.41-* \
-      sudo-1.8.19p2-* \
+      sudo-1.8.23-* \
       which-2.20-*" && \
     echo "Validating the existence of the following packages:" && \
     for PKG in ${PKGS_TO_INSTALL}; do \
